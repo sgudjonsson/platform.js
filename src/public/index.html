@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Test</title>
+        <meta charset="utf-8" />
+        <script src="/dist/platform.js"></script>
+    </head>
+    <body>
+
+        <select id="accounts">
+        </select>
+
+        <p>
+            <input type="text" placeholder="Amount" id="transfer-amount" />
+            <button id="transfer-button">Transfer</button>
+        </p>
+
+        <ul id="accounts-list">
+        </ul>
+
+        <script>
+
+            // declare our services...
+            var accountsService = new Accounts();
+            var transferService = new Transfers();
+
+
+            // some helper functions
+            function addOption(name, value, container) {
+                var elm = document.createElement('option');
+                elm.value = value;
+
+                var content = document.createTextNode(name);
+                elm.appendChild(content);
+
+                container.appendChild(elm);
+            }
+
+            function addLI(text, container) {
+                var elm = document.createElement('li');
+
+                var content = document.createTextNode(text);
+                elm.appendChild(content);
+
+                container.appendChild(elm);
+            }
+
+            function displayAccounts(accounts) {
+                var list = document.getElementById('accounts-list');
+                while (list.firstChild) {
+                    list.removeChild(list.firstChild);
+                }
+
+                accounts.forEach(function(account) {
+                    addLI(account.id + ' '+ account.balance +' ISK', list);
+                });
+            }
+
+            // add ui events
+            var transferButton = document.getElementById('transfer-button');
+            transferButton.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                var accountId = document.getElementById('accounts').value;
+                var amount = parseInt(document.getElementById('transfer-amount').value);
+                
+                transferService.transfer(accountId, amount)
+            });
+
+
+            // fire up the platform...
+            
+            accountsService.on('change', function(account, accounts) {
+                displayAccounts(accounts);
+            });
+
+            accountsService
+                .getAccounts()
+                .then(function(accounts) {
+                    var accountsDropdown = document.getElementById('accounts');
+                    accounts.forEach(function(account) {
+                        addOption(account.id, account.id, accountsDropdown);
+                    });
+                    
+                    displayAccounts(accounts);
+
+                });
+
+        </script>
+    </body>
+</html>
